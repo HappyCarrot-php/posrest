@@ -1,0 +1,18 @@
+{
+  "empresa": {
+    "nombre": "Sistema POS Restaurante",
+    "direccion": "Av. Principal 123, Ciudad Central",
+    "telefono": "+52 123 456 7890"
+  },
+  "impresion": {
+    "mostrar_preview": true,
+    "formato_ticket": "A4",
+    "directorio_pdf": "${user.home}/posrest/tickets"
+  },
+  "reportes": {
+    "jasper": {
+      "carpeta": "reportes",
+      "reporte_principal": "ventas_general"
+    }
+  }
+}

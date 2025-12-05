@@ -27,6 +27,28 @@
             <version>42.6.0</version>
         </dependency>
 
+        <!-- JasperReports para generación de reportes -->
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>6.21.3</version>
+        </dependency>
+
+        <!-- Fuentes adicionales de JasperReports -->
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports-fonts</artifactId>
+            <version>6.21.3</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- OpenPDF para generación de tickets en PDF -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>1.3.39</version>
+        </dependency>
+
         <!-- Swing ya viene incluido en el JDK -->
     </dependencies>
 

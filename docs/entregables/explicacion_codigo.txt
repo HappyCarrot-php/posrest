@@ -1,0 +1,13 @@
+Resumen sencillo del código POSRest:
+
+- La aplicación está escrita en Java 11 usando Swing con un patrón Modelo-Vista-Controlador (MVC).
+- **Modelo** (`src/main/java/com/restaurante/model`): clases que representan la información real del negocio: `Producto`, `Mesa`, `Usuario`, `Venta`, `DetalleVenta`, `Ticket` y `Respaldo`.
+- **DAO** (`dao`): cada entidad tiene una clase para hablar con PostgreSQL (Supabase). Se encargan de ejecutar SQL y devolver objetos Java listos para usar.
+- **Controller** (`controller`): contiene la lógica de negocio. Por ejemplo, `VentaController` valida un carrito, crea la venta, inserta detalles, genera el ticket y registra auditoría.
+- **View** (`view`): todas las ventanas Swing. `LoginFrame` muestra el login, `MenuPrincipalFrame` es el tablero y desde ahí se abren pantallas para productos, mesas, usuarios, ventas y reportes.
+- **Util** (`util`): utilidades compartidas. `ConexionDB` abre la conexión a Supabase, `JasperReportManager` carga reportes Jasper, `TicketPdfGenerator` genera el PDF del ticket y `DesktopUtils` abre el archivo en el navegador.
+- Los reportes se diseñan en `src/main/resources/reportes/ventas_general.jrxml`. La pantalla `ReporteFrame` manda llamar a JasperReports para renderizarlo.
+- Los datos iniciales de la base están en `CREATE_DB.sql`. Incluye usuarios demo, productos y ventas de ejemplo para probar de inmediato.
+- Para generar un ticket PDF basta con registrar una venta y pulsar "Exportar PDF"; se guarda en `%USERPROFILE%/posrest/tickets` y se abre solo.
+
+Con esta vista rápida puedes explicar el código sin entrar en detalles complicados: cada capa tiene su carpeta, los controladores enlazan vistas con DAOs y el resto son utilidades para PDF y reportes.

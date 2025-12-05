@@ -53,9 +53,21 @@ proyecto_pos/
     │   ├── TicketFrame.java                  ✅ Visualización Ticket
     │   └── ReporteFrame.java                 ✅ Reportes de Ventas
     │
-    └── util/
-        ├── ConexionDB.java                   ✅ Gestión Conexiones
-        └── Validaciones.java                 ✅ Validaciones
+   └── util/
+      ├── ConexionDB.java                   ✅ Gestión Conexiones
+      ├── JasperReportManager.java          ✅ Integración JasperReports
+      ├── TicketPdfGenerator.java           ✅ Generación de tickets PDF
+      ├── DesktopUtils.java                 ✅ Utilidades de escritorio
+      └── Validaciones.java                 ✅ Validaciones
+│
+├── src/main/resources/
+│   ├── reportes/ventas_general.jrxml         ✅ Plantilla JasperReports
+│   └── data/configuracion.json               ✅ Configuración JSON de ejemplo
+│
+└── docs/
+   ├── uml/uso-caso-posrest.puml            ✅ Diagrama de casos de uso (PlantUML)
+   ├── uml/clases-posrest.puml              ✅ Diagrama de clases (PlantUML)
+   └── prototipado/prototipos.md            ✅ Bitácora de prototipado UI
 ```
 
 ### 📊 Estadísticas del Proyecto
@@ -114,12 +126,14 @@ proyecto_pos/
 - [x] Datos completos de venta
 - [x] Vista previa
 - [x] Opción de impresión (simulada)
+- [x] Exportación PDF con apertura automática en navegador
 
 #### ✅ Reportes
 - [x] Ventas por período (Hoy, Semana, Mes, Todas)
 - [x] Cálculo de totales
 - [x] Conteo de ventas
 - [x] Detalle completo
+- [x] Visualización JasperReports
 
 #### ✅ Auditoría
 - [x] Registro de todas las operaciones

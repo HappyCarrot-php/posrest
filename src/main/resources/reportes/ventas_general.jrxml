@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+    name="ventas_general" pageWidth="595" pageHeight="842" columnWidth="515" leftMargin="40" rightMargin="40" topMargin="40"
+    bottomMargin="40" uuid="6b65f136-6f45-4d6a-9903-5f4b4bf53671">
+    <property name="net.sf.jasperreports.default.pdf.encoding" value="Cp1252"/>
+    <property name="net.sf.jasperreports.default.pdf.font" value="Helvetica"/>
+    <property name="net.sf.jasperreports.export.pdf.author" value="Sistema POS Restaurante"/>
+    <parameter name="FECHA_INICIO" class="java.sql.Timestamp"/>
+    <parameter name="FECHA_FIN" class="java.sql.Timestamp"/>
+    <queryString>
+        <![CDATA[
+SELECT id, fecha_venta, total, id_usuario, id_mesa
+FROM ventas
+WHERE fecha_venta >= COALESCE($P{FECHA_INICIO}, fecha_venta)
+    AND fecha_venta <= COALESCE($P{FECHA_FIN}, fecha_venta)
+ORDER BY fecha_venta DESC
+        ]]>
+    </queryString>
+    <field name="id" class="java.lang.Integer"/>
+    <field name="fecha_venta" class="java.sql.Timestamp"/>
+    <field name="total" class="java.math.BigDecimal"/>
+    <field name="id_usuario" class="java.lang.Integer"/>
+    <field name="id_mesa" class="java.lang.Integer"/>
+    <variable name="TotalVentas" class="java.math.BigDecimal" calculation="Sum">
+        <variableExpression><![CDATA[$F{total}]]></variableExpression>
+    </variable>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <title>
+        <band height="90">
+            <rectangle>
+                <reportElement x="0" y="0" width="515" height="70" backcolor="#0F172A" mode="Opaque" uuid="788dcd00-6925-4e3b-8061-7261b1cfa453"/>
+            </rectangle>
+            <staticText>
+                <reportElement x="0" y="10" width="515" height="24" uuid="e1675143-6737-4cee-bd8e-9b6a327d0b35" forecolor="#FFFFFF"/>
+                <textElement textAlignment="Center">
+                    <font size="18" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Sistema POS Restaurante]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="34" width="515" height="18" uuid="b9c7e3d9-3d63-4f4d-9589-1aafc079c570" forecolor="#E2E8F0"/>
+                <textElement textAlignment="Center">
+                    <font size="12"/>
+                </textElement>
+                <text><![CDATA[Reporte Consolidado de Ventas]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="56" width="515" height="20" uuid="7801b4e2-4f5c-47c7-9d51-1062bd6834fe" forecolor="#CBD5F5"/>
+                <textElement textAlignment="Center">
+                    <font size="11"/>
+                </textElement>
+                <textFieldExpression><![CDATA[
+$P{FECHA_INICIO} == null || $P{FECHA_FIN} == null ? "Periodo: Todas las fechas" : "Periodo: " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format($P{FECHA_INICIO}) + " a " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format($P{FECHA_FIN})
+                ]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+    <columnHeader>
+        <band height="30">
+            <rectangle>
+                <reportElement x="0" y="4" width="515" height="22" backcolor="#0F172A" mode="Opaque" uuid="ba77d960-ec48-42f4-8172-9af6794a7c67"/>
+            </rectangle>
+            <staticText>
+                <reportElement x="0" y="5" width="60" height="20" forecolor="#FFFFFF" uuid="f9a9efa3-9eaa-4c58-a8f6-52872d73a420"/>
+                <textElement textAlignment="Center">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[ID]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="60" y="5" width="140" height="20" forecolor="#FFFFFF" uuid="e1d52d3d-10ea-4aa5-b173-2b2fc7f66f55"/>
+                <textElement textAlignment="Center">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Fecha]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="200" y="5" width="100" height="20" forecolor="#FFFFFF" uuid="c52fb5f9-346d-4cd1-8e7d-906a56b21e02"/>
+                <textElement textAlignment="Center">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Total]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="300" y="5" width="100" height="20" forecolor="#FFFFFF" uuid="b0a871de-6b65-4d4b-8dac-6b0ce5093d3a"/>
+                <textElement textAlignment="Center">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Usuario]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="400" y="5" width="115" height="20" forecolor="#FFFFFF" uuid="9ae13a19-3d47-49ce-aee6-01522ee5e56c"/>
+                <textElement textAlignment="Center">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Mesa]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+    <detail>
+        <band height="20" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="0" width="60" height="20" uuid="0b9f12f4-7a87-4c90-a63c-8e6439a45c3d"/>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{id}]]></textFieldExpression>
+            </textField>
+            <textField pattern="dd/MM/yyyy HH:mm">
+                <reportElement x="60" y="0" width="140" height="20" uuid="c544ce4e-9d25-4dcb-a583-0e064e8c2f5f"/>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{fecha_venta}]]></textFieldExpression>
+            </textField>
+            <textField pattern="$ #,##0.00">
+                <reportElement x="200" y="0" width="100" height="20" uuid="a7e8ed2f-540e-4b7f-bcf4-6223aa8ec43c"/>
+                <textElement textAlignment="Right"/>
+                <textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="300" y="0" width="100" height="20" uuid="c8a2fd9c-3036-4581-9c5d-8dcba5711f98"/>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{id_usuario}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="400" y="0" width="115" height="20" uuid="358cfa14-b32a-4b46-933d-1f8fc156a2f0"/>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{id_mesa} == null ? "-" : $F{id_mesa}.toString()]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+    <columnFooter>
+        <band height="1"/>
+    </columnFooter>
+    <summary>
+        <band height="100">
+            <rectangle>
+                <reportElement x="0" y="5" width="515" height="70" backcolor="#F8FAFC" mode="Opaque" uuid="2a9cb5f3-0f9b-4b4c-8ef1-e1b7935e1cf9"/>
+            </rectangle>
+            <staticText>
+                <reportElement x="20" y="10" width="200" height="20" uuid="ebeaa75e-a269-4eab-8e60-5f73f6405f0b"/>
+                <textElement>
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Resumen financiero]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="20" y="32" width="150" height="18" uuid="6f28c0a7-78f5-4a13-a1db-275a0b4a39d9"/>
+                <text><![CDATA[Subtotal (sin IVA)]]></text>
+            </staticText>
+            <textField pattern="$ #,##0.00">
+                <reportElement x="350" y="32" width="165" height="18" uuid="0a6ab169-8b79-4b90-93b1-ffac8e4abddb"/>
+                <textElement textAlignment="Right"/>
+                <textFieldExpression><![CDATA[$V{TotalVentas} == null ? java.math.BigDecimal.ZERO : $V{TotalVentas}.divide(new java.math.BigDecimal("1.16"), 2, java.math.RoundingMode.HALF_UP)]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="20" y="52" width="150" height="18" uuid="2baf31a5-4b4d-47e8-9d7f-55293476e46e"/>
+                <text><![CDATA[IVA (16%)]]></text>
+            </staticText>
+            <textField pattern="$ #,##0.00">
+                <reportElement x="350" y="52" width="165" height="18" uuid="f02ef27f-e9ff-4f01-87e7-d069b11e6d09"/>
+                <textElement textAlignment="Right"/>
+                <textFieldExpression><![CDATA[$V{TotalVentas} == null ? java.math.BigDecimal.ZERO : $V{TotalVentas}.subtract($V{TotalVentas}.divide(new java.math.BigDecimal("1.16"), 2, java.math.RoundingMode.HALF_UP))]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="20" y="72" width="150" height="18" uuid="a92b7917-cc51-4c38-9a0d-7d0f045732f7"/>
+                <textElement>
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Total general]]></text>
+            </staticText>
+            <textField pattern="$ #,##0.00">
+                <reportElement x="350" y="72" width="165" height="18" uuid="11c16cab-33bb-4fcd-aba9-6f948f667055"/>
+                <textElement textAlignment="Right">
+                    <font isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$V{TotalVentas} == null ? java.math.BigDecimal.ZERO : $V{TotalVentas}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+</jasperReport>

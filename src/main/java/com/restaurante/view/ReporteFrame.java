@@ -2,13 +2,19 @@ package com.restaurante.view;
 
 import com.restaurante.controller.VentaController;
 import com.restaurante.model.Venta;
+import com.restaurante.util.JasperReportManager;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import net.sf.jasperreports.engine.JRException;
 
 /**
  * Ventana de reportes de ventas con diseño moderno.
@@ -21,6 +27,9 @@ public class ReporteFrame extends JFrame {
     private JComboBox<String> cboPeriodo;
     private JLabel lblTotalVentas;
     private JLabel lblCantidadVentas;
+    private LocalDateTime ultimoInicio;
+    private LocalDateTime ultimoFin;
+    private boolean usarRangoFechas;
     
     // Colores modernos
     private static final Color PRIMARY_COLOR = new Color(74, 144, 226);
@@ -102,6 +111,10 @@ public class ReporteFrame extends JFrame {
         ModernButton btnActualizar = new ModernButton("Actualizar", PRIMARY_COLOR, Color.WHITE);
         btnActualizar.setPreferredSize(new Dimension(120, 35));
         btnActualizar.addActionListener(e -> cargarReporte());
+
+        ModernButton btnJasper = new ModernButton("Ver en Jasper", SUCCESS_COLOR, Color.WHITE);
+        btnJasper.setPreferredSize(new Dimension(120, 35));
+        btnJasper.addActionListener(e -> generarReporteJasper());
         
         JPanel filtroTop = new JPanel(new BorderLayout());
         filtroTop.setOpaque(false);
@@ -110,7 +123,13 @@ public class ReporteFrame extends JFrame {
         
         cardFiltro.add(filtroTop, BorderLayout.NORTH);
         cardFiltro.add(cboPeriodo, BorderLayout.CENTER);
-        cardFiltro.add(btnActualizar, BorderLayout.SOUTH);
+
+        JPanel buttonsPanel = new JPanel(new GridLayout(2, 1, 0, 10));
+        buttonsPanel.setOpaque(false);
+        buttonsPanel.add(btnActualizar);
+        buttonsPanel.add(btnJasper);
+
+        cardFiltro.add(buttonsPanel, BorderLayout.SOUTH);
         
         // Card 2: Cantidad de ventas
         JPanel cardCantidad = createCard();
@@ -226,6 +245,35 @@ public class ReporteFrame extends JFrame {
                 break;
         }
     }
+
+    private void generarReporteJasper() {
+        Map<String, Object> parametros = new HashMap<>();
+
+        if (usarRangoFechas && ultimoInicio != null && ultimoFin != null) {
+            parametros.put("FECHA_INICIO", Timestamp.valueOf(ultimoInicio));
+            parametros.put("FECHA_FIN", Timestamp.valueOf(ultimoFin));
+        } else {
+            parametros.put("FECHA_INICIO", null);
+            parametros.put("FECHA_FIN", null);
+        }
+
+        try {
+            JasperReportManager.mostrarReporteEnPantalla("ventas_general", parametros);
+        } catch (JRException | SQLException ex) {
+            ex.printStackTrace();
+            String detalle = ex.getMessage();
+            Throwable causa = ex.getCause();
+            if (causa != null && causa.getMessage() != null) {
+                detalle += "\nCausa: " + causa.getMessage();
+            }
+            JOptionPane.showMessageDialog(
+                this,
+                "No se pudo generar el reporte: " + detalle,
+                "Error JasperReports",
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
     
     private void cargarReporteHoy() {
         LocalDateTime inicio = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
@@ -246,6 +294,10 @@ public class ReporteFrame extends JFrame {
     }
     
     private void cargarReporteTodas() {
+        usarRangoFechas = false;
+        ultimoInicio = null;
+        ultimoFin = null;
+
         modeloTabla.setRowCount(0);
         List<Venta> ventas = ventaController.obtenerTodasLasVentas();
         double total = 0.0;
@@ -266,6 +318,10 @@ public class ReporteFrame extends JFrame {
     }
     
     private void cargarVentas(LocalDateTime inicio, LocalDateTime fin) {
+        usarRangoFechas = true;
+        ultimoInicio = inicio;
+        ultimoFin = fin;
+
         modeloTabla.setRowCount(0);
         List<Venta> ventas = ventaController.obtenerVentasPorFechas(inicio, fin);
         double total = ventaController.calcularTotalVentas(inicio, fin);

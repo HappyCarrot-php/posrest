@@ -2,6 +2,8 @@ package com.restaurante.controller;
 
 import com.restaurante.dao.*;
 import com.restaurante.model.*;
+import com.restaurante.util.FinancialUtils;
+import com.restaurante.util.FinancialUtils.TotalesVenta;
 import com.restaurante.util.Validaciones;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -74,7 +76,8 @@ public class VentaController {
         }
         
         // Calcular total
-        double total = calcularTotal(items);
+        TotalesVenta totales = FinancialUtils.calcularTotales(items);
+        double total = totales.getTotal();
         
         if (!Validaciones.esPositivo(total)) {
             System.err.println("El total debe ser mayor a cero");
@@ -125,7 +128,7 @@ public class VentaController {
             
             // 3. Generar ticket
             String folio = ticketDAO.generarFolio();
-            double cambio = montoPagado - total;
+            double cambio = FinancialUtils.redondear(montoPagado - total);
             
             Ticket ticket = new Ticket(idVenta, folio, total, cambio);
             if (!ticketDAO.insertar(ticket)) {
@@ -157,11 +160,21 @@ public class VentaController {
      * @return total calculado
      */
     public double calcularTotal(List<ItemVenta> items) {
-        double total = 0.0;
-        for (ItemVenta item : items) {
-            total += item.getSubtotal();
-        }
-        return total;
+        return FinancialUtils.calcularTotales(items).getTotal();
+    }
+
+    /**
+     * Calcula el subtotal sin impuestos.
+     */
+    public double calcularSubtotal(List<ItemVenta> items) {
+        return FinancialUtils.calcularTotales(items).getSubtotal();
+    }
+
+    /**
+     * Calcula el IVA correspondiente a los ítems.
+     */
+    public double calcularIva(List<ItemVenta> items) {
+        return FinancialUtils.calcularTotales(items).getIva();
     }
     
     /**
@@ -172,7 +185,7 @@ public class VentaController {
      * @return cambio a devolver
      */
     public double calcularCambio(double total, double montoPagado) {
-        return montoPagado - total;
+        return FinancialUtils.redondear(montoPagado - total);
     }
     
     /**

@@ -1,5 +1,6 @@
 package com.restaurante.view;
 
+import com.restaurante.config.SupabaseConfig;
 import com.restaurante.controller.UsuarioController;
 import com.restaurante.model.Usuario;
 import javax.swing.*;
@@ -28,6 +29,15 @@ public class MenuPrincipalFrame extends JFrame {
     private static final Color MESAS_COLOR = new Color(111, 66, 193);
     private static final Color USUARIOS_COLOR = new Color(253, 126, 20);
     private static final Color REPORTES_COLOR = new Color(220, 53, 69);
+    private static final Color RESPALDO_COLOR = new Color(52, 152, 219);
+
+    // Iconografía en formato Unicode para evitar problemas de codificación
+    private static final String ICON_VENTAS = "\uD83D\uDED2"; // 🛒
+    private static final String ICON_PRODUCTOS = "\uD83D\uDCE6"; // 📦
+    private static final String ICON_MESAS = "\uD83C\uDF7D\uFE0F"; // 🍽️
+    private static final String ICON_USUARIOS = "\uD83D\uDC65"; // 👥
+    private static final String ICON_REPORTES = "\uD83D\uDCCA"; // 📊
+    private static final String ICON_RESPALDO = "\uD83D\uDCBE"; // 💾
     
     public MenuPrincipalFrame(UsuarioController usuarioController) {
         this.usuarioController = usuarioController;
@@ -113,7 +123,7 @@ public class MenuPrincipalFrame extends JFrame {
         gbc.gridx = col++;
         gbc.gridy = row;
         mainPanel.add(createMenuCard(
-            "�️", "Nueva Venta", "Registrar venta de productos", VENTAS_COLOR,
+            ICON_VENTAS, "Nueva Venta", "Registrar venta de productos", VENTAS_COLOR,
             () -> new VentaFrame(usuarioController).setVisible(true)
         ), gbc);
         
@@ -122,7 +132,7 @@ public class MenuPrincipalFrame extends JFrame {
             gbc.gridx = col++;
             gbc.gridy = row;
             mainPanel.add(createMenuCard(
-                "📦", "Productos", "Gestionar inventario de productos", PRODUCTOS_COLOR,
+                ICON_PRODUCTOS, "Productos", "Gestionar inventario de productos", PRODUCTOS_COLOR,
                 () -> new ProductoFrame().setVisible(true)
             ), gbc);
         }
@@ -135,7 +145,7 @@ public class MenuPrincipalFrame extends JFrame {
         gbc.gridx = col++;
         gbc.gridy = row;
         mainPanel.add(createMenuCard(
-            "🍽️", "Mesas", "Administrar mesas del restaurante", MESAS_COLOR,
+            ICON_MESAS, "Mesas", "Administrar mesas del restaurante", MESAS_COLOR,
             () -> new MesaFrame().setVisible(true)
         ), gbc);
         
@@ -148,7 +158,7 @@ public class MenuPrincipalFrame extends JFrame {
             gbc.gridx = col++;
             gbc.gridy = row;
             mainPanel.add(createMenuCard(
-                "👥", "Usuarios", "Gestionar usuarios del sistema", USUARIOS_COLOR,
+                ICON_USUARIOS, "Usuarios", "Gestionar usuarios del sistema", USUARIOS_COLOR,
                 () -> new UsuarioFrame().setVisible(true)
             ), gbc);
         }
@@ -162,7 +172,7 @@ public class MenuPrincipalFrame extends JFrame {
             gbc.gridx = col++;
             gbc.gridy = row;
             mainPanel.add(createMenuCard(
-                "📊", "Reportes", "Ver estadísticas y reportes", REPORTES_COLOR,
+                ICON_REPORTES, "Reportes", "Ver estadísticas y reportes", REPORTES_COLOR,
                 () -> new ReporteFrame().setVisible(true)
             ), gbc);
         }
@@ -176,7 +186,7 @@ public class MenuPrincipalFrame extends JFrame {
             gbc.gridx = col++;
             gbc.gridy = row;
             mainPanel.add(createMenuCard(
-                "💾", "Respaldo BD", "Exportar base de datos SQL", new Color(52, 152, 219),
+                ICON_RESPALDO, "Respaldo BD", "Exportar base de datos SQL", RESPALDO_COLOR,
                 () -> exportarRespaldoBD()
             ), gbc);
         }
@@ -192,97 +202,94 @@ public class MenuPrincipalFrame extends JFrame {
     }
     
     private JPanel createMenuCard(String icon, String title, String description, Color accentColor, Runnable action) {
+        final JPanel accentLine = new JPanel();
+        accentLine.setBackground(accentColor);
+        accentLine.setPreferredSize(new Dimension(6, 56));
+
         JPanel card = new JPanel() {
             private boolean isHovered = false;
-            
+
             {
+                setToolTipText(description);
                 addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseEntered(MouseEvent e) {
                         isHovered = true;
                         setCursor(new Cursor(Cursor.HAND_CURSOR));
+                        accentLine.setBackground(accentColor.brighter());
                         repaint();
                     }
-                    
+
                     @Override
                     public void mouseExited(MouseEvent e) {
                         isHovered = false;
                         setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                        accentLine.setBackground(accentColor);
                         repaint();
                     }
-                    
+
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         action.run();
                     }
                 });
             }
-            
+
             @Override
             protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                // Sombra
-                if (isHovered) {
-                    g2.setColor(new Color(0, 0, 0, 40));
-                    g2.fill(new RoundRectangle2D.Double(4, 6, getWidth() - 8, getHeight() - 8, 15, 15));
-                } else {
-                    g2.setColor(new Color(0, 0, 0, 15));
-                    g2.fill(new RoundRectangle2D.Double(2, 4, getWidth() - 4, getHeight() - 4, 15, 15));
-                }
-                
-                // Fondo
+
+                Color shadow = isHovered ? new Color(0, 0, 0, 45) : new Color(0, 0, 0, 20);
+                g2.setColor(shadow);
+                g2.fill(new RoundRectangle2D.Double(4, 6, getWidth() - 8, getHeight() - 12, 18, 18));
+
                 g2.setColor(CARD_BG);
-                g2.fill(new RoundRectangle2D.Double(0, 0, getWidth() - 4, getHeight() - 6, 15, 15));
-                
+                g2.fill(new RoundRectangle2D.Double(6, 6, getWidth() - 12, getHeight() - 12, 18, 18));
+
                 g2.dispose();
+                super.paintComponent(g);
             }
         };
-        
-        card.setLayout(new BorderLayout(0, 15));
+
+        card.setLayout(new BorderLayout(0, 18));
         card.setOpaque(false);
-        card.setBorder(BorderFactory.createEmptyBorder(30, 25, 30, 25));
+        card.setBorder(BorderFactory.createEmptyBorder(30, 28, 30, 28));
         card.setPreferredSize(new Dimension(280, 190));
-        
-        // Icono y línea de acento
+
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
-        
+
         JLabel lblIcon = new JLabel(icon);
-        lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 58));
-        
-        JPanel accentLine = new JPanel();
-        accentLine.setBackground(accentColor);
-        accentLine.setPreferredSize(new Dimension(4, 58));
-        
+        lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 56));
+        lblIcon.setHorizontalAlignment(SwingConstants.CENTER);
+        lblIcon.setForeground(accentColor.darker());
+        lblIcon.setBorder(BorderFactory.createEmptyBorder(0, 14, 0, 0));
+
         topPanel.add(accentLine, BorderLayout.WEST);
-        topPanel.add(Box.createRigidArea(new Dimension(15, 0)), BorderLayout.CENTER);
-        topPanel.add(lblIcon, BorderLayout.EAST);
-        
-        // Textos
+        topPanel.add(lblIcon, BorderLayout.CENTER);
+
         JPanel textPanel = new JPanel();
         textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
         textPanel.setOpaque(false);
-        
+
         JLabel lblTitle = new JLabel(title);
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));
         lblTitle.setForeground(TEXT_PRIMARY);
         lblTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
+
         JLabel lblDesc = new JLabel("<html>" + description + "</html>");
         lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         lblDesc.setForeground(TEXT_SECONDARY);
         lblDesc.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
+
         textPanel.add(lblTitle);
         textPanel.add(Box.createRigidArea(new Dimension(0, 8)));
         textPanel.add(lblDesc);
-        
+
         card.add(topPanel, BorderLayout.NORTH);
         card.add(textPanel, BorderLayout.CENTER);
-        
+
         return card;
     }
     
@@ -322,50 +329,56 @@ public class MenuPrincipalFrame extends JFrame {
         
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             java.io.File fileToSave = fileChooser.getSelectedFile();
-            
-            // Ejecutar pg_dump para exportar la BD
+            if (!fileToSave.getName().toLowerCase().endsWith(".sql")) {
+                fileToSave = new java.io.File(fileToSave.getAbsolutePath() + ".sql");
+            }
+
             try {
-                String dbUrl = "db.hytgyqitddddzwqhfgmf.supabase.co";
+                String projectId = SupabaseConfig.SUPABASE_URL
+                    .replace("https://", "")
+                    .replace(".supabase.co", "");
+                String dbHost = "db." + projectId + ".supabase.co";
                 String dbPort = "5432";
                 String dbName = "postgres";
-                String dbUser = "postgres";
-                String dbPassword = System.getenv("SUPABASE_PASSWORD"); // Por seguridad
-                
-                if (dbPassword == null || dbPassword.isEmpty()) {
-                    dbPassword = JOptionPane.showInputDialog(this, 
-                        "Ingrese la contraseña de la base de datos:", 
-                        "Contraseña requerida", 
-                        JOptionPane.QUESTION_MESSAGE);
+                String dbUser = SupabaseConfig.getDbUser();
+                String dbPassword = SupabaseConfig.getDbPassword();
+
+                if (dbPassword == null || dbPassword.isBlank()) {
+                    JOptionPane.showMessageDialog(this,
+                        "No se encontró la contraseña en SupabaseConfig.getDbPassword().\n" +
+                        "Actualiza el archivo con tus credenciales reales.",
+                        "Credenciales incompletas",
+                        JOptionPane.WARNING_MESSAGE);
+                    return;
                 }
-                
-                if (dbPassword != null && !dbPassword.isEmpty()) {
-                    String command = String.format(
-                        "pg_dump -h %s -p %s -U %s -d %s -f \"%s\"",
-                        dbUrl, dbPort, dbUser, dbName, fileToSave.getAbsolutePath()
-                    );
-                    
-                    ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", command);
-                    pb.environment().put("PGPASSWORD", dbPassword);
-                    pb.redirectErrorStream(true);
-                    
-                    Process process = pb.start();
-                    int exitCode = process.waitFor();
-                    
-                    if (exitCode == 0) {
-                        JOptionPane.showMessageDialog(this,
-                            "Respaldo creado exitosamente en:\n" + fileToSave.getAbsolutePath(),
-                            "Respaldo Completado",
-                            JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(this,
-                            "Error al crear respaldo. Asegúrese de tener PostgreSQL instalado y en PATH.",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                    }
+
+                String command = String.format(
+                    "pg_dump -h %s -p %s -U %s -d %s -f \"%s\"",
+                    dbHost, dbPort, dbUser, dbName, fileToSave.getAbsolutePath()
+                );
+
+                ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", command);
+                pb.environment().put("PGPASSWORD", dbPassword);
+                pb.redirectErrorStream(true);
+
+                Process process = pb.start();
+                int exitCode = process.waitFor();
+
+                if (exitCode == 0) {
+                    JOptionPane.showMessageDialog(this,
+                        "Respaldo creado exitosamente en:\n" + fileToSave.getAbsolutePath(),
+                        "Respaldo Completado",
+                        JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                        "Error al crear respaldo. Asegúrese de tener PostgreSQL instalado y en PATH.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
                 }
+
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
-                    "Error al crear respaldo:\n" + ex.getMessage() + 
+                    "Error al crear respaldo:\n" + ex.getMessage() +
                     "\n\nAsegúrese de tener pg_dump instalado y accesible.",
                     "Error",
                     JOptionPane.ERROR_MESSAGE);

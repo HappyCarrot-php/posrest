@@ -2,10 +2,13 @@ package com.restaurante.view;
 
 import com.restaurante.controller.*;
 import com.restaurante.model.*;
+import com.restaurante.util.FinancialUtils;
+import com.restaurante.util.FinancialUtils.TotalesVenta;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Locale;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,13 +37,14 @@ public class VentaFrame extends JFrame {
     private JSpinner spnCantidad;
     private JTable tablaCarrito;
     private DefaultTableModel modeloCarrito;
-    private JLabel lblTotal, lblCambio, lblItemsCount;
+    private JLabel lblSubtotal, lblIva, lblTotal, lblCambio, lblItemsCount;
     private JTextField txtMontoPagado;
     private ModernButton btnAgregar, btnQuitar, btnRegistrar, btnRegresar, btnLimpiar;
     
     private List<VentaController.ItemVenta> carrito;
     private List<Producto> productosDisponibles;
     private List<Mesa> mesasLibres;
+    private double totalConIvaActual = 0.0;
     
     public VentaFrame(UsuarioController usuarioController) {
         this.usuarioController = usuarioController;
@@ -296,7 +300,7 @@ public class VentaFrame extends JFrame {
         // Total
         JPanel totalPanel = new JPanel();
         totalPanel.setLayout(new BoxLayout(totalPanel, BoxLayout.Y_AXIS));
-        totalPanel.setBackground(new Color(40, 167, 69, 20));
+        totalPanel.setBackground(new Color(224, 247, 228));
         totalPanel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(SUCCESS_COLOR, 2, true),
             BorderFactory.createEmptyBorder(15, 15, 15, 15)
@@ -309,14 +313,42 @@ public class VentaFrame extends JFrame {
         lblTotalLabel.setForeground(TEXT_SECONDARY);
         lblTotalLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        lblTotal = new JLabel("$0.00");
+        lblTotal = new JLabel(formatearMoneda(0));
         lblTotal.setFont(new Font("Segoe UI", Font.BOLD, 36));
         lblTotal.setForeground(SUCCESS_COLOR);
         lblTotal.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JPanel desglosePanel = new JPanel(new GridLayout(2, 2, 8, 4));
+        desglosePanel.setOpaque(false);
+
+        JLabel lblSubtotalTitle = new JLabel("Subtotal");
+        lblSubtotalTitle.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblSubtotalTitle.setForeground(TEXT_SECONDARY);
+
+        lblSubtotal = new JLabel(formatearMoneda(0));
+        lblSubtotal.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblSubtotal.setForeground(TEXT_PRIMARY);
+        lblSubtotal.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        JLabel lblIvaTitle = new JLabel("IVA (16%)");
+        lblIvaTitle.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblIvaTitle.setForeground(TEXT_SECONDARY);
+
+        lblIva = new JLabel(formatearMoneda(0));
+        lblIva.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblIva.setForeground(TEXT_PRIMARY);
+        lblIva.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        desglosePanel.add(lblSubtotalTitle);
+        desglosePanel.add(lblSubtotal);
+        desglosePanel.add(lblIvaTitle);
+        desglosePanel.add(lblIva);
         
         totalPanel.add(lblTotalLabel);
         totalPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         totalPanel.add(lblTotal);
+        totalPanel.add(Box.createRigidArea(new Dimension(0, 12)));
+        totalPanel.add(desglosePanel);
         
         card.add(totalPanel);
         
@@ -486,28 +518,41 @@ public class VentaFrame extends JFrame {
         }
         
         lblTotal.setText(String.format("$%.2f", total));
-        lblItemsCount.setText(carrito.size() + " producto(s)");
+        int totalArticulos = carrito.stream().mapToInt(VentaController.ItemVenta::getCantidad).sum();
+        lblItemsCount.setText(totalArticulos + (totalArticulos == 1 ? " artículo" : " artículos"));
+
+        TotalesVenta totales = FinancialUtils.calcularTotales(carrito);
+        totalConIvaActual = totales.getTotal();
+        lblSubtotal.setText(formatearMoneda(totales.getSubtotal()));
+        lblIva.setText(formatearMoneda(totales.getIva()));
+        lblTotal.setText(formatearMoneda(totales.getTotal()));
+
         calcularCambio();
     }
     
     private void calcularCambio() {
         try {
-            String totalStr = lblTotal.getText().replace("$", "").trim();
             String pagadoStr = txtMontoPagado.getText().trim();
-            
+
             if (!pagadoStr.isEmpty()) {
-                double total = Double.parseDouble(totalStr);
-                double pagado = Double.parseDouble(pagadoStr);
-                double cambio = pagado - total;
-                
-                lblCambio.setText(String.format("$%.2f", cambio));
+                String normalizado = pagadoStr.replace("$", "").replace(" ", "");
+                if (normalizado.contains(",") && !normalizado.contains(".")) {
+                    normalizado = normalizado.replace(",", ".");
+                } else {
+                    normalizado = normalizado.replace(",", "");
+                }
+
+                double pagado = Double.parseDouble(normalizado);
+                double cambio = FinancialUtils.redondear(pagado - totalConIvaActual);
+
+                lblCambio.setText(formatearMoneda(cambio));
                 lblCambio.setForeground(cambio < 0 ? DANGER_COLOR : PRIMARY_COLOR);
             } else {
-                lblCambio.setText("$0.00");
+                lblCambio.setText(formatearMoneda(0));
                 lblCambio.setForeground(PRIMARY_COLOR);
             }
         } catch (NumberFormatException e) {
-            lblCambio.setText("$0.00");
+            lblCambio.setText(formatearMoneda(0));
             lblCambio.setForeground(PRIMARY_COLOR);
         }
     }
@@ -526,7 +571,7 @@ public class VentaFrame extends JFrame {
         
         try {
             double montoPagado = Double.parseDouble(montoPagadoStr);
-            double total = ventaController.calcularTotal(carrito);
+                double total = ventaController.calcularTotal(carrito);
             
             if (montoPagado < total) {
                 mostrarMensaje("El monto pagado es insuficiente", "Error", JOptionPane.ERROR_MESSAGE);
@@ -552,7 +597,7 @@ public class VentaFrame extends JFrame {
                 // Mostrar ticket
                 Ticket ticket = ventaController.buscarTicketPorFolio(folio);
                 if (ticket != null) {
-                    TicketFrame ticketFrame = new TicketFrame(ticket, carrito, usuarioController.getUsuarioActual());
+                    TicketFrame ticketFrame = new TicketFrame(ticket, new ArrayList<>(carrito), usuarioController.getUsuarioActual());
                     ticketFrame.setVisible(true);
                 }
                 
@@ -576,6 +621,10 @@ public class VentaFrame extends JFrame {
         } catch (NumberFormatException ex) {
             mostrarMensaje("El monto pagado debe ser un número válido", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private String formatearMoneda(double valor) {
+        return String.format(Locale.US, "$%,.2f", valor);
     }
     
     private void mostrarMensaje(String mensaje, String titulo, int tipo) {

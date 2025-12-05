@@ -1,0 +1,71 @@
+@startuml
+!theme plain
+
+package "com.restaurante" {
+  package controller {
+    class VentaController {
+      +registrarVenta(idUsuario: int, idMesa: Integer, items: List<ItemVenta>, montoPagado: double): String
+      +obtenerTodasLasVentas(): List<Venta>
+      +calcularTotalVentas(fechaInicio: LocalDateTime, fechaFin: LocalDateTime): double
+    }
+    class ProductoController
+    class UsuarioController
+    class MesaController
+    class VentaController::ItemVenta
+  }
+
+  package model {
+    class Venta {
+      -id: int
+      -idUsuario: int
+      -idMesa: Integer
+      -total: double
+      -fechaVenta: LocalDateTime
+    }
+    class Ticket {
+      -folio: String
+      -total: double
+      -cambio: double
+      -fechaEmision: LocalDateTime
+    }
+    class Producto
+    class Usuario
+  }
+
+  package dao {
+    class VentaDAO
+    class TicketDAO
+    class DetalleVentaDAO
+    class ProductoDAO
+  }
+
+  package util {
+    class ConexionDB
+    class JasperReportManager
+    class TicketPdfGenerator
+  }
+
+  package view {
+    class VentaFrame
+    class TicketFrame
+    class ReporteFrame
+  }
+}
+
+VentaController --> VentaDAO
+VentaController --> DetalleVentaDAO
+VentaController --> TicketDAO
+VentaController --> ProductoDAO
+VentaController --> MesaController
+
+VentaController::ItemVenta --> Producto
+
+TicketFrame --> Ticket
+TicketFrame --> VentaController::ItemVenta
+TicketFrame --> Usuario
+TicketFrame --> TicketPdfGenerator
+
+ReporteFrame --> JasperReportManager
+ReporteFrame --> VentaController
+
+@enduml

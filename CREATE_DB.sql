@@ -158,6 +158,86 @@ INSERT INTO mesas (numero, estado) VALUES
 (10, 'libre');
 
 -- ============================================================
+-- DATOS EXTENDIDOS PARA DEMOSTRACIÓN
+-- ============================================================
+
+-- Usuarios adicionales de ejemplo (contraseñas planas para demo)
+INSERT INTO usuarios (nombre, correo, contraseña_hash, rol) VALUES
+('Sofía Ramírez', 'sofia@restaurante.com', 'supervisor123', 'administrador'),
+('Luis Mendoza', 'luis@restaurante.com', 'turnoA2024', 'cajero'),
+('Carolina Díaz', 'carolina@restaurante.com', 'mesera2024', 'mesero');
+
+-- Productos destacados adicionales
+INSERT INTO productos (nombre, categoria, precio, disponible) VALUES
+('Boneless BBQ', 'Entrada', 78.00, TRUE),
+('Combo Familiar', 'Comida', 245.00, TRUE),
+('Limonada Mineral', 'Bebida', 32.00, TRUE),
+('Brownie con Helado', 'Postre', 58.00, TRUE);
+
+-- Ajustar estado inicial de algunas mesas para simular actividad
+UPDATE mesas SET estado = 'ocupada' WHERE numero IN (2, 5);
+UPDATE mesas SET estado = 'reservada' WHERE numero = 8;
+
+-- Venta de demostración #1 (mesa 1, cajero)
+INSERT INTO ventas (id_usuario, id_mesa, total, fecha_venta)
+VALUES (
+    (SELECT id FROM usuarios WHERE correo = 'cajero@restaurante.com'),
+    (SELECT id FROM mesas WHERE numero = 1),
+    255.00,
+    NOW() - INTERVAL '3 days 2 hours'
+);
+
+INSERT INTO detalle_ventas (id_venta, id_producto, cantidad, precio_unitario, subtotal) VALUES
+(currval('ventas_id_seq'), (SELECT id FROM productos WHERE nombre = 'Hamburguesa Clásica'), 2, 85.00, 170.00),
+(currval('ventas_id_seq'), (SELECT id FROM productos WHERE nombre = 'Refresco Cola'), 2, 25.00, 50.00),
+(currval('ventas_id_seq'), (SELECT id FROM productos WHERE nombre = 'Pastel de Chocolate'), 1, 35.00, 35.00);
+
+INSERT INTO tickets (id_venta, folio, total, cambio, fecha_emision)
+VALUES (currval('ventas_id_seq'), 'TKT-202501-001', 255.00, 45.00, NOW() - INTERVAL '3 days 1 hour');
+
+INSERT INTO respaldo (tipo_operacion, descripcion)
+VALUES ('VENTA_DEMO', 'Venta demo #1 registrada (mesa 1, ticket TKT-202501-001).');
+
+-- Venta de demostración #2 (pedido para llevar, sin mesa)
+INSERT INTO ventas (id_usuario, id_mesa, total, fecha_venta)
+VALUES (
+    (SELECT id FROM usuarios WHERE correo = 'luis@restaurante.com'),
+    NULL,
+    309.00,
+    NOW() - INTERVAL '1 day 5 hours'
+);
+
+INSERT INTO detalle_ventas (id_venta, id_producto, cantidad, precio_unitario, subtotal) VALUES
+(currval('ventas_id_seq'), (SELECT id FROM productos WHERE nombre = 'Combo Familiar'), 1, 245.00, 245.00),
+(currval('ventas_id_seq'), (SELECT id FROM productos WHERE nombre = 'Limonada Mineral'), 2, 32.00, 64.00);
+
+INSERT INTO tickets (id_venta, folio, total, cambio, fecha_emision)
+VALUES (currval('ventas_id_seq'), 'TKT-202501-002', 309.00, 11.00, NOW() - INTERVAL '1 day 4 hours 15 minutes');
+
+INSERT INTO respaldo (tipo_operacion, descripcion)
+VALUES ('VENTA_DEMO', 'Venta demo #2 registrada (llevar, ticket TKT-202501-002).');
+
+-- Venta de demostración #3 (mesa 5, mesero)
+INSERT INTO ventas (id_usuario, id_mesa, total, fecha_venta)
+VALUES (
+    (SELECT id FROM usuarios WHERE correo = 'carolina@restaurante.com'),
+    (SELECT id FROM mesas WHERE numero = 5),
+    168.00,
+    NOW() - INTERVAL '6 hours'
+);
+
+INSERT INTO detalle_ventas (id_venta, id_producto, cantidad, precio_unitario, subtotal) VALUES
+(currval('ventas_id_seq'), (SELECT id FROM productos WHERE nombre = 'Boneless BBQ'), 1, 78.00, 78.00),
+(currval('ventas_id_seq'), (SELECT id FROM productos WHERE nombre = 'Pizza Margarita'), 1, 60.00, 60.00),
+(currval('ventas_id_seq'), (SELECT id FROM productos WHERE nombre = 'Agua Natural'), 2, 15.00, 30.00);
+
+INSERT INTO tickets (id_venta, folio, total, cambio, fecha_emision)
+VALUES (currval('ventas_id_seq'), 'TKT-202501-003', 168.00, 32.00, NOW() - INTERVAL '5 hours 45 minutes');
+
+INSERT INTO respaldo (tipo_operacion, descripcion)
+VALUES ('VENTA_DEMO', 'Venta demo #3 registrada (mesa 5, ticket TKT-202501-003).');
+
+-- ============================================================
 -- REGISTRO DE AUDITORÍA INICIAL
 -- ============================================================
 INSERT INTO respaldo (tipo_operacion, descripcion) 

@@ -6,10 +6,10 @@ Sistema completo de Punto de Venta (POS) para restaurantes desarrollado en **Jav
 
 - ✅ Sistema de login con roles (Administrador, Cajero, Mesero)
 - ✅ Gestión completa de productos, mesas y usuarios
-- ✅ Registro de ventas con generación automática de tickets
+- ✅ Registro de ventas con generación automática de tickets y exportación a PDF en navegador
 - ✅ Cálculo automático de totales y cambio
 - ✅ Control de estado de mesas (libre/ocupada/reservada)
-- ✅ Reportes de ventas por períodos
+- ✅ Reportes de ventas por períodos con visor JasperReports integrado
 - ✅ Auditoría completa de operaciones
 - ✅ Interfaz gráfica moderna y funcional
 
@@ -24,7 +24,7 @@ src/main/java/com/restaurante/
 ├── model/           # Entidades del sistema
 ├── controller/      # Lógica de negocio
 ├── view/            # Interfaces gráficas (Swing)
-├── util/            # Utilidades y validaciones
+├── util/            # Utilidades (conexión, JasperReports, PDF, validaciones)
 └── Main.java        # Punto de entrada
 ```
 
@@ -165,7 +165,36 @@ productos ──────────────┘
     <artifactId>postgresql</artifactId>
     <version>42.6.0</version>
 </dependency>
+
+<dependency>
+    <groupId>net.sf.jasperreports</groupId>
+    <artifactId>jasperreports</artifactId>
+    <version>6.21.3</version>
+</dependency>
+
+<dependency>
+    <groupId>net.sf.jasperreports</groupId>
+    <artifactId>jasperreports-fonts</artifactId>
+    <version>6.21.3</version>
+    <scope>runtime</scope>
+</dependency>
+
+<dependency>
+    <groupId>com.github.librepdf</groupId>
+    <artifactId>openpdf</artifactId>
+    <version>1.3.39</version>
+</dependency>
 ```
+
+## 📁 Documentación entregable
+
+- `docs/uml/uso-caso-posrest.puml`: diagrama de casos de uso (PlantUML).
+- `docs/uml/clases-posrest.puml`: diagrama de clases lógico del sistema.
+- `docs/prototipado/prototipos.md`: bitácora de prototipado de las principales pantallas Swing.
+- `src/main/resources/data/configuracion.json`: ejemplo de configuración en formato JSON.
+- `src/main/resources/reportes/ventas_general.jrxml`: plantilla JasperReports lista para compilar.
+
+> Los archivos `.puml` pueden convertirse a PNG o SVG ejecutando PlantUML. Para mantener el repositorio ligero solo se distribuyen las fuentes.
 
 ## 🔧 Solución de Problemas
 
@@ -197,7 +226,7 @@ El sistema usa el Look and Feel nativo del sistema operativo. Es normal que se v
 3. Opcionalmente selecciona una mesa
 4. Ingresa el monto pagado
 5. Haz clic en **REGISTRAR VENTA**
-6. Se generará un ticket automáticamente
+6. Se generará un ticket automáticamente y podrás elegir **Exportar PDF** para abrirlo en el navegador
 
 ### 3. Gestionar Productos
 1. Haz clic en **PRODUCTOS**
@@ -208,7 +237,7 @@ El sistema usa el Look and Feel nativo del sistema operativo. Es normal que se v
 ### 4. Ver Reportes
 1. Haz clic en **REPORTES**
 2. Selecciona el período (Hoy, Esta Semana, Este Mes, Todas)
-3. Visualiza el resumen y detalle de ventas
+3. Visualiza el resumen y detalle de ventas y usa **Ver en Jasper** para abrir el reporte formal
 
 ## 🔐 Seguridad
 
